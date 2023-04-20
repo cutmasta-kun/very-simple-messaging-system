@@ -18,7 +18,8 @@ Dieses Projekt stellt ein einfaches Messaging-System zur Verfügung, das auf `nt
 
 1. Klonen Sie dieses Repository:
    ```bash
-   git clone https://github.com/yourusername/very-simple-messaging-system.git cd very-simple-messaging-system
+   git clone https://github.com/yourusername/very-simple-messaging-system.git 
+   cd very-simple-messaging-system
    ```
 
 2.  Starten Sie die Docker-Container mit `docker-compose`:
