@@ -33,10 +33,6 @@ docker-compose up -d
 
 Die `very-simple-messaging-app` verwendet Python-Skripte, um auf eingehende Nachrichten zu reagieren. Wenn eine Nachricht empfangen wird, führt das Skript eine Aktion aus und speichert die JSON-Nachricht als Datei auf dem `very-simple-upload-server`.
 
-## Anpassung und Erweiterung
-
-Sie können dieses Projekt anpassen und erweitern, indem Sie die Python-Skripte in `./src/commands` ändern oder eigene Skripte hinzufügen. Stellen Sie sicher, dass die Skripte korrekt auf die API des `very-simple-upload-server` zugreifen, um die ankommenden JSON-Nachrichten als Dateien zu speichern.
-
 ## Debug-Modus
 
 Um den Debug-Modus zu aktivieren, setzen Sie die Umgebungsvariable `DEBUG` auf `true` in der `docker-compose.yaml` Datei. Dies zeigt zusätzliche Informationen während der Ausführung des Projekts an, die bei der Fehlersuche und Entwicklung hilfreich sein können.
