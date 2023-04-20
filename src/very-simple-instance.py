@@ -24,7 +24,10 @@ message_data = {
     "raw": json.loads(message_raw)    # Laden Sie die Roh-JSON-Nachricht als Python-Objekt
 }
 
-print(message_data)
+# Überprüfen Sie den DEBUG Wert und drucken Sie die Nachricht nur, wenn DEBUG auf true gesetzt ist
+debug = os.environ.get("DEBUG", "false")
+if debug.lower() == "true":
+    print(message_data)
 
 filename = f"{message_id}.json"
 
