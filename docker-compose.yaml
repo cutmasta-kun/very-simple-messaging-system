@@ -15,7 +15,7 @@ services:
         retries: 3
         start_period: 40s
     restart: unless-stopped
-    user: "vala:vala"
+    user: "1000:1000"
 
   very-simple-messaging-app:
     build:

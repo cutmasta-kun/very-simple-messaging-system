@@ -1,3 +1,5 @@
+print("very-simple-start-skript.py is running...")
+
 import os
 import subprocess
 
@@ -10,7 +12,12 @@ client_script = "./very-simple-upload-server-client.py"
 topic = os.environ["NTFY_TOPIC"]
 
 # Erstellen Sie den Befehl für die ntfy-Sub-Instanz
-ntfy_cmd = f"ntfy subscribe {topic} 'python3 {client_script}'"
+ntfy_cmd = f"ntfy --debug subscribe {topic} 'python3 {client_script}'"
 
-# Starten Sie die ntfy-Sub-Instanz
-subprocess.run(ntfy_cmd, shell=True)
+while True:
+    try:
+        # Starten Sie die ntfy-Sub-Instanz und leiten Sie stdout und stderr an die Konsole weiter
+        subprocess.run(ntfy_cmd, shell=True, check=True)
+
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred: {e}")

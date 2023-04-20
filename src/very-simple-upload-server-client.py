@@ -7,7 +7,9 @@ message_id = os.environ["NTFY_ID"]
 message_time = os.environ["NTFY_TIME"]
 message_topic = os.environ["NTFY_TOPIC"]
 message_body = os.environ["NTFY_MESSAGE"]
+message_title = os.environ["NTFY_TITLE"]
 message_priority = os.environ["NTFY_PRIORITY"]
+message_tags = os.environ["NTFY_TAGS"]
 message_raw = os.environ["NTFY_RAW"]
 
 # Erstellen Sie eine JSON-Datei aus der empfangenen Nachricht
@@ -16,11 +18,13 @@ message_data = {
     "time": message_time,
     "topic": message_topic,
     "message": message_body,
+    "title": message_title,
     "priority": message_priority,
+    "tags": message_tags.split(','),  # Konvertieren Sie die kommaseparierte Liste in ein Array
+    "raw": json.loads(message_raw)    # Laden Sie die Roh-JSON-Nachricht als Python-Objekt
 }
 
 print(message_data)
-
 
 filename = f"{message_id}.json"
 
