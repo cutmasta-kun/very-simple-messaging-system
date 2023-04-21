@@ -1,7 +1,7 @@
 # very_simple_start_skript.py
 import os
 import subprocess
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def get_topics_from_env():
     ntfy_topics = os.environ.get("NTFY_TOPICS")
@@ -15,7 +15,7 @@ def get_topics_from_env():
             raise ValueError("No NTFY_TOPIC or NTFY_TOPICS provided. At least one topic is required.")
     return topics
 
-def run_ntfy(topic):
+def run_ntfy(topic, client_script):
     print(f"Subscribing to topic: {topic}")
 
     debug = os.environ.get("DEBUG", "false")
@@ -31,19 +31,17 @@ def main():
 
     client_script = os.path.join('.', 'very_simple_instance.py')  # Verwenden von os.path.join() für plattformübergreifende Kompatibilität
 
-    ntfy_topics = os.environ.get("NTFY_TOPICS")
-
-    if ntfy_topics:
-        topics = ntfy_topics.split(',')
-    else:
-        topic = os.environ.get("NTFY_TOPIC")
-        if topic:
-            topics = [topic]
-        else:
-            raise ValueError("No NTFY_TOPIC or NTFY_TOPICS provided. At least one topic is required.")
+    topics = get_topics_from_env()
 
     with ThreadPoolExecutor() as executor:
-        futures = [executor.submit(run_ntfy, topic) for topic in topics]
+        futures = [executor.submit(run_ntfy, topic, client_script) for topic in topics]
+
+        # Wait for all run_ntfy calls to complete
+        for future in as_completed(futures):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Error in run_ntfy: {e}")
 
 if __name__ == "__main__":
     try:
