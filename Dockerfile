@@ -26,7 +26,7 @@ RUN pip install requests
 WORKDIR /src
 
 # Kopieren des Skripts in den Container
-COPY src/very-simple-start-skript.py /src/very-simple-start-skript.py
+COPY src/very_simple_start_skript.py /src/very_simple_start_skript.py
 
 # Standardkommando, das beim Start des Containers ausgeführt wird
-CMD ["python3", "-u", "very-simple-start-skript.py"]
+CMD ["python3", "-u", "very_simple_start_skript.py"]

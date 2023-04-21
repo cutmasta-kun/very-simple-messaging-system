@@ -25,7 +25,7 @@ services:
     environment:
       - NTFY_VERSION=2.3.1
       - PY_VERSION=3.11.3
-      - NTFY_TOPIC=
+      - NTFY_TOPIC=a7c4e5ce498c4b9cc0cc02c1a3e7e3fe_8f581b69-8522-4418-96ba-6fd66e4
       # - NTFY_TOPICS= # Fügen Sie die NTFY_TOPICS Umgebungsvariable hinzu. z.B: topic1,topic2,topic3
       - NTFY_HOST="https://ntfy.sh" # Fügen Sie die NTFY_HOST Umgebungsvariable hinzu
       # - DEBUG=true # Füge eine DEBUG Variable ein für verbosere Log Messages
