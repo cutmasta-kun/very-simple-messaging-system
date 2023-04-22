@@ -1,41 +1,44 @@
+# docker-compose.yaml
+
 version: '3.9'
 
 services:
   very-simple-upload-server:
-    image: hallotschuess/very-simple-upload-server:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.upload-server
+    image: very-simple-upload-server
     container_name: very-simple-upload-server
     environment:
       - very-simple-uuid-token=0dcac178-d084-4313-be7c-330a4c9f0867
     volumes:
       - ./data:/uploads
-    healthcheck: # optional: remember to adapt the host:port to your environment
-        test: ["CMD-SHELL", "wget -q --tries=1 http://localhost:80/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
-        interval: 60s
-        timeout: 10s
-        retries: 3
-        start_period: 40s
     restart: unless-stopped
     user: "1000:1000"
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'app' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   very-simple-messaging-app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.app
+    image: very-simple-messaging-app
     container_name: very-simple-messaging-app
+    env_file: .env
     environment:
-      - NTFY_VERSION=2.3.1
-      - PY_VERSION=3.11.3
-      - NTFY_TOPIC=a7c4e5ce498c4b9cc0cc02c1a3e7e3fe_8f581b69-8522-4418-96ba-6fd66e4
-      # - NTFY_TOPICS= # Fügen Sie die NTFY_TOPICS Umgebungsvariable hinzu. z.B: topic1,topic2,topic3
-      - NTFY_HOST="https://ntfy.sh" # Fügen Sie die NTFY_HOST Umgebungsvariable hinzu
-      # - DEBUG=true # Füge eine DEBUG Variable ein für verbosere Log Messages
+      - NTFY_TOPIC=${NTFY_TOPIC}
+      - NTFY_HOST=${NTFY_HOST}
+      - DEBUG=${DEBUG}
     volumes:
       - ./src:/src
-    healthcheck: # optional: remember to adapt the host:port to your environment
-        test: ["CMD-SHELL", "wget -q --tries=1 http://very-simple-upload-server/v1/health -O - | grep -Eo '\"connection to very-simple-upload-server\"\\s*:\\s*true' || exit 1"]
-        interval: 60s
-        timeout: 10s
-        retries: 3
-        start_period: 40s
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
-
+    healthcheck:
+      test: ["CMD-SHELL", "docker container inspect --format='{{.State.Health.Status}}' very-simple-upload-server | grep -q 'healthy' || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

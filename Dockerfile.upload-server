@@ -1,0 +1,12 @@
+# Dockerfile.upload-server
+
+FROM alpine:3.17.3
+
+COPY --from=hallotschuess/very-simple-upload-server:latest /server/app ./
+
+RUN apk --no-cache add wget
+
+HEALTHCHECK  --interval=5m --timeout=3s \
+  CMD pgrep -f "app" || exit 1
+
+ENTRYPOINT ["./app"]

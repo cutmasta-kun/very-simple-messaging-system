@@ -1,0 +1,25 @@
+# docker-compose.override.test.yaml
+
+version: '3.9'
+
+services:
+  very-simple-upload-server:
+    ports:
+      - "9090:80"
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f './app' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  very-simple-messaging-app:
+    env_file:
+      - .env.test
+    environment:
+      NTFY_TOPIC: ${NTFY_TOPIC}
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'very_simple_start_skript.py' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s

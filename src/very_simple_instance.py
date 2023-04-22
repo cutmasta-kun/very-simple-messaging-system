@@ -4,8 +4,10 @@ import json
 import os
 import requests
 
-def process_message(message_data):
+def on_message(topic, payload):
+    print(f"Message received: {topic} {payload}")  # Diese Zeile hinzufügen, um die empfangene Nachricht auszugeben
 
+def process_message(message_data):
     message_id = message_data["NTFY_ID"]
     message_time = message_data["NTFY_TIME"]
     message_topic = message_data["NTFY_TOPIC"]
@@ -33,6 +35,9 @@ def process_message(message_data):
     if debug.lower() == "true":
         print(message_data)
 
+        # Rufen Sie die on_message-Funktion auf
+        on_message(message_data["topic"], message_data["message"])
+
     filename = f"{message_id}.json"
 
     # Speichern Sie die JSON-Datei in einer temporären Datei
@@ -42,9 +47,14 @@ def process_message(message_data):
     # URL des very-simple-upload-server
     upload_url = "http://very-simple-upload-server:80"
 
-    # Übertragen Sie die JSON-Datei an den very-simple-upload-server
+    if debug.lower() == "true":
+        print(f"Uploading file {filename} to {upload_url}/{message_topic}/{filename}")
+
     with open(filename, "rb") as json_file:
         response = requests.put(f"{upload_url}/{message_topic}/{filename}", files={"file": json_file})
+
+    if debug.lower() == "true":
+        print(f"File uploaded. Response status code: {response.status_code}")
 
     # Entfernen Sie die temporäre Datei
     os.remove(filename)
