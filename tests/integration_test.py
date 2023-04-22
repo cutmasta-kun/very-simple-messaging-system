@@ -83,7 +83,7 @@ def wait_for_containers_healthcheck(max_wait_time=300):
                     print(f"{container_name} is healthy")
                 else:
                     print(f"Waiting for {container_name} to become healthy (current status: {health_status})")
-                    container_logs = container.logs().decode("utf-8")
+                    container_logs = container.logs(tail=2).decode("utf-8")
                     print(f"Logs for {container_name}:\n{container_logs}")
         time.sleep(5)
 
