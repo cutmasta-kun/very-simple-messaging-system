@@ -23,9 +23,11 @@ pre_tests_passed = False
 def start_containers():
     print("Starting containers...")
 
-    # Set the NTFY_TOPIC environment variable for the docker-compose process
+    # Set the NTFY_TOPIC, NTFY_HOST, and DEBUG environment variables for the docker-compose process
     env = os.environ.copy()
     env["NTFY_TOPIC"] = str(test_topic)
+    env["NTFY_HOST"] = 'test_host'  # Replace 'test_host' with the actual value
+    env["DEBUG"] = 'true'
 
     # Erstellen Sie das data_test-Verzeichnis, falls es nicht existiert
     os.makedirs(data_directory, exist_ok=True)

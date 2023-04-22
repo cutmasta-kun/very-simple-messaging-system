@@ -59,7 +59,7 @@ def process_message(message_data):
     # Entfernen Sie die temporäre Datei
     os.remove(filename)
 
-if __name__ == "__main__":
+def main():
     message_data = {
         "NTFY_ID": os.environ["NTFY_ID"],
         "NTFY_TIME": os.environ["NTFY_TIME"],
@@ -71,3 +71,6 @@ if __name__ == "__main__":
         "NTFY_RAW": os.environ["NTFY_RAW"],
     }
     process_message(message_data)
+
+if __name__ == "__main__":
+    main()

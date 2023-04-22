@@ -2,7 +2,9 @@
 
 import os
 import subprocess
+import multiprocessing
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Optional, Callable
 
 def get_topics_from_env():
     ntfy_topics = os.environ.get("NTFY_TOPICS")
@@ -26,26 +28,34 @@ def run_ntfy(topic, client_script):
 
     process.wait()
 
-def main():
+def main(run_function: Optional[Callable] = None, use_multiprocessing: bool = True):
     print("very-simple-start-skript.py is running...")
     print('Start Message System...')
 
-    client_script = os.path.join('.', 'very_simple_instance.py')  # Verwenden von os.path.join() für plattformübergreifende Kompatibilität
+    client_script = os.path.join('.', 'very_simple_instance.py')
 
-    topics = get_topics_from_env()
-
-    with ThreadPoolExecutor() as executor:
-        futures = [executor.submit(run_ntfy, topic, client_script) for topic in topics]
-
-        # Wait for all run_ntfy calls to complete
-        for future in as_completed(futures):
-            try:
-                future.result()
-            except Exception as e:
-                print(f"Error in run_ntfy: {e}")
-
-if __name__ == "__main__":
     try:
-        main()
+        topics = get_topics_from_env()
     except ValueError as e:
         print(f"Error: {e}")
+        return
+
+    if run_function is None:
+        run_function = run_ntfy
+
+    processes = []
+    if use_multiprocessing:
+        for topic in topics:
+            process = multiprocessing.Process(target=run_function, args=(topic, client_script))
+            processes.append(process)
+            process.start()
+
+        # Wait for all run_ntfy calls to complete
+        for process in processes:
+            process.join()
+    else:
+        for topic in topics:
+            run_function(topic, client_script)
+
+if __name__ == "__main__":
+    main()

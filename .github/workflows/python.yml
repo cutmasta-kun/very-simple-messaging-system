@@ -60,7 +60,7 @@ jobs:
     - name: Set environment variables
       run: |
         echo "DEBUG=true" >> $GITHUB_ENV
-        echo "NTFY_TOPIC=" >> $GITHUB_ENV
+        echo "NTFY_TOPIC=" >> $GITHUB_ENV  # Set a value here, or use an env variable from the repository or GitHub Secrets
     - name: Run integration tests
       run: |
         pytest --junitxml=integration-test-results.xml tests/integration_test.py
