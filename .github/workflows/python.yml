@@ -31,6 +31,10 @@ jobs:
         sudo systemctl start docker
         sudo systemctl enable docker
         sudo docker --version
+    - name: Set environment variables
+      run: |
+        echo "NTFY_HOST=https://ntfy.sh" >> $GITHUB_ENV
+        echo "DEBUG=true" >> $GITHUB_ENV
     - name: Run tests
       run: |
         pytest tests/
