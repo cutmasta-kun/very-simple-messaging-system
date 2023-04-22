@@ -60,7 +60,7 @@ def stop_containers():
 
     print("Containers stopped")
 
-def wait_for_containers_healthcheck(max_wait_time=60):
+def wait_for_containers_healthcheck(max_wait_time=120):
     client = docker.from_env()
     container_names = [
         "very-simple-upload-server",

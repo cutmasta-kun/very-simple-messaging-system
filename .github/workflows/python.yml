@@ -42,7 +42,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run unittests
       run: |
-        pytest tests/test_instance.py tests/test_very_simple_start_skript.py
+        pytest --junitxml=unittest-results.xml tests/test_instance.py tests/test_very_simple_start_skript.py
 
   integration_tests:
     runs-on: ubuntu-latest
@@ -64,4 +64,5 @@ jobs:
         echo "NTFY_TOPIC=" >> $GITHUB_ENV
     - name: Run integration tests
       run: |
-        pytest tests/integration_test.py
+        pytest --junitxml=integration-test-results.xml tests/integration_test.py
+  
