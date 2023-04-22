@@ -9,10 +9,11 @@ import time
 import docker
 import subprocess
 import sys
+import shutil
 
 messaging_app_url = os.environ.get("NTFY_HOST", "https://ntfy.sh")
 upload_server_url = "http://test_very-simple-upload-server:9090"  # Passen Sie die URL an Ihre Umgebung an
-data_directory = "./data"
+data_directory = "./data_test"
 test_uuid = uuid.uuid4()
 test_topic = os.environ.get("NTFY_TOPIC", uuid.uuid4())
 test_message = f"test_message_with_uuid:{test_uuid}"
@@ -23,6 +24,9 @@ def start_containers():
     # Set the NTFY_TOPIC environment variable for the docker-compose process
     env = os.environ.copy()
     env["NTFY_TOPIC"] = str(test_topic)
+
+    # Erstellen Sie das data_test-Verzeichnis, falls es nicht existiert
+    os.makedirs(data_directory, exist_ok=True)
 
     result = subprocess.run(
         [
@@ -39,7 +43,7 @@ def start_containers():
         text=True,
         env=env,  # Pass the modified environment to the subprocess
     )
-    
+
     if result.returncode != 0:
         raise RuntimeError(f"Failed to start containers: {result.stderr}")
 
@@ -50,6 +54,10 @@ def stop_containers():
     result = subprocess.run(["docker-compose", "down"], capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(f"Failed to stop containers: {result.stderr}")
+    
+    # Löschen des data_test-Verzeichnisses
+    shutil.rmtree(data_directory, ignore_errors=True)
+
     print("Containers stopped")
 
 def wait_for_containers_healthcheck(max_wait_time=60):

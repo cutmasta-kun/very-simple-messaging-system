@@ -35,7 +35,10 @@ jobs:
       run: |
         echo "NTFY_HOST=https://ntfy.sh" >> $GITHUB_ENV
         echo "DEBUG=true" >> $GITHUB_ENV
-        echo "NTFY_TOPIC=" >> $$GITHUB_ENV
+        echo "NTFY_TOPIC=" >> $GITHUB_ENV
+    - name: Build Docker Images
+      run: |
+        docker-compose --file docker-compose.yaml --file docker-compose.override.test.yaml build
     - name: Run tests
       run: |
         pytest tests/
