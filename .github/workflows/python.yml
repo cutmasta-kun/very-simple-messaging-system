@@ -35,6 +35,7 @@ jobs:
       run: |
         echo "NTFY_HOST=https://ntfy.sh" >> $GITHUB_ENV
         echo "DEBUG=true" >> $GITHUB_ENV
+        echo "NTFY_TOPIC=" >> $$GITHUB_ENV
     - name: Run tests
       run: |
         pytest tests/

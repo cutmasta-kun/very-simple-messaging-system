@@ -27,7 +27,6 @@ services:
       dockerfile: Dockerfile.app
     image: very-simple-messaging-app
     container_name: very-simple-messaging-app
-    env_file: .env
     environment:
       - NTFY_TOPIC=${NTFY_TOPIC}
       - NTFY_HOST=${NTFY_HOST}
