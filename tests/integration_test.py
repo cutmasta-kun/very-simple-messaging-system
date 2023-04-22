@@ -10,6 +10,7 @@ import docker
 import subprocess
 import sys
 import shutil
+import stat
 
 messaging_app_url = os.environ.get("NTFY_HOST", "https://ntfy.sh")
 upload_server_url = "http://test_very-simple-upload-server:9090"  # Passen Sie die URL an Ihre Umgebung an
@@ -17,6 +18,7 @@ data_directory = "./data_test"
 test_uuid = uuid.uuid4()
 test_topic = os.environ.get("NTFY_TOPIC", uuid.uuid4())
 test_message = f"test_message_with_uuid:{test_uuid}"
+pre_tests_passed = False
 
 def start_containers():
     print("Starting containers...")
@@ -106,7 +108,47 @@ def wait_for_app_initialization(container_name, max_wait_time=30):
         if elapsed_time > max_wait_time:
             raise TimeoutError(f"Max wait time of {max_wait_time}s exceeded while waiting for {container_name} initialization")
 
+class PreIntegrationTest(unittest.TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        global pre_tests_passed
+        pre_tests_passed = True  # Diese Zeile wird nur ausgeführt, wenn alle Pre-Tests erfolgreich sind
+
+    def test_docker(self):
+        # Test, ob Docker installiert ist und ordnungsgemäß funktioniert
+        try:
+            version_output = subprocess.check_output(["docker", "--version"]).decode("utf-8").strip()
+            print(f"Docker version: {version_output}")
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            self.fail("Docker is not installed or not working properly")
+
+    def test_docker_socket_permissions(self):
+        # Test, ob die Berechtigungen für die Docker-Socket-Datei korrekt sind
+        docker_socket_path = "/var/run/docker.sock"
+        if os.path.exists(docker_socket_path):
+            socket_stat = os.stat(docker_socket_path)
+            if not socket_stat.st_mode & stat.S_IRUSR:
+                self.fail("Docker socket does not have read permission for the owner")
+            if not socket_stat.st_mode & stat.S_IWUSR:
+                self.fail("Docker socket does not have write permission for the owner")
+        else:
+            self.fail("Docker socket not found")
+
+    def test_dependencies(self):
+        # Test, ob alle notwendigen Abhängigkeiten installiert sind
+        dependencies = ["requests", "docker"]
+        for dependency in dependencies:
+            try:
+                __import__(dependency)
+            except ImportError:
+                self.fail(f"Dependency '{dependency}' is not installed")
+
 class IntegrationTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        global pre_tests_passed
+        if not pre_tests_passed:
+            raise unittest.SkipTest("Skipping integration tests since pre-tests did not pass")
     def test_integration(self):
         print("Running integration test")
         try:
