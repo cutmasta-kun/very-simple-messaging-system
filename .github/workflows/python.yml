@@ -27,17 +27,22 @@ jobs:
       run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     - name: Build Docker Images
       run: |
-        docker-compose --file docker-compose.yaml --file docker-compose.test.yaml build
-    - name: Tag Test Docker Images
+        docker-compose build
+    - name: Tag and Push Docker Images
       run: |
-        docker tag ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest very_simple_upload_server_test:latest
-        docker tag ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest very_simple_messaging_app_test:latest
-    - name: Push Test Docker Images to GitHub Container Registry
+        docker tag very_simple_upload_server ghcr.io/${{ github.repository }}/very_simple_upload_server:latest
+        docker push ghcr.io/${{ github.repository }}/very_simple_upload_server:latest
+        docker tag very_simple_messaging_app ghcr.io/${{ github.repository }}/very_simple_messaging_app:latest
+        docker push ghcr.io/${{ github.repository }}/very_simple_messaging_app:latest
+    - name: Get image URLs
+      id: extract-image-url
       run: |
-        docker tag very_simple_upload_server_test ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest
-        docker push ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest
-        docker tag very_simple_messaging_app_test ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest
-        docker push ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest
+        VERY_SIMPLE_UPLOAD_SERVER_IMAGE=$(docker inspect --format='{{index .RepoDigests 0}}' very_simple_upload_server)
+        VERY_SIMPLE_MESSAGING_APP_IMAGE=$(docker inspect --format='{{index .RepoDigests 0}}' very_simple_messaging_app)
+        echo "VERY_SIMPLE_UPLOAD_SERVER_IMAGE=$VERY_SIMPLE_UPLOAD_SERVER_IMAGE"
+        echo "VERY_SIMPLE_MESSAGING_APP_IMAGE=$VERY_SIMPLE_MESSAGING_APP_IMAGE"
+        echo "::set-output name=very_simple_upload_server_image::$VERY_SIMPLE_UPLOAD_SERVER_IMAGE"
+        echo "::set-output name=very_simple_messaging_app_image::$VERY_SIMPLE_MESSAGING_APP_IMAGE"
 
   unittests:
     runs-on: ubuntu-latest
@@ -52,14 +57,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Log in to GitHub Container Registry
-      run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-    - name: Pull Docker Images
-      run: |
-        docker pull ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest
-        docker tag ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest very_simple_upload_server
-        docker pull ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest
-        docker tag ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest very_simple_messaging_app
     - name: Run unittests
       run: |
         pytest --junitxml=unittest-results.xml tests/test_instance.py tests/test_very_simple_start_skript.py
@@ -77,19 +74,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Log in to GitHub Container Registry
-      run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-    - name: Pull Docker Images
-      run: |
-        docker pull ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest
-        docker tag ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest very_simple_upload_server
-        docker pull ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest
-        docker tag ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest very_simple_messaging_app
     - name: Set environment variables
       run: |
         echo "DEBUG=true" >> $GITHUB_ENV
         echo "NTFY_TOPIC=" >> $GITHUB_ENV  # Set a value here, or use an env variable from the repository or GitHub Secrets
+        echo "VERY_SIMPLE_UPLOAD_SERVER_IMAGE=${{ needs.build_images.outputs.very_simple_upload_server_image }}" >> $GITHUB_ENV
+        echo "VERY_SIMPLE_MESSAGING_APP_IMAGE=${{ needs.build_images.outputs.very_simple_messaging_app_image }}" >> $GITHUB_ENV
     - name: Run integration tests
+      env:
+        CI: true
       run: |
         pytest --junitxml=integration-test-results.xml tests/integration_test.py
-

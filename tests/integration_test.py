@@ -6,12 +6,12 @@ import unittest
 import json
 import uuid
 import time
-import docker
 import subprocess
 import sys
 import shutil
 import stat
 import re
+import docker
 
 messaging_app_url = os.environ.get("NTFY_HOST", "https://ntfy.sh")
 upload_server_url = "http://test_very-simple-upload-server:9090"  # Passen Sie die URL an Ihre Umgebung an
@@ -27,28 +27,23 @@ def start_containers():
     # Erstellen Sie das data_test-Verzeichnis, falls es nicht existiert
     os.makedirs(data_directory, exist_ok=True)
 
-    # Aktualisieren Sie die docker-compose.override.test.yaml Datei mit den Umgebungsvariablen
-    with open("docker-compose.override.test.yaml", "r") as file:
-        content = file.read()
-
-    content = re.sub(r'NTFY_TOPIC: \${NTFY_TOPIC:-}', f'NTFY_TOPIC: {test_topic}', content)
-
-    with open("docker-compose.override.test_updated.yaml", "w") as file:
-        file.write(content)
-
     result = subprocess.run(
         [
             "docker-compose",
             "--file",
-            "docker-compose.yaml",  # Use the test file instead of docker-compose.yaml
+            "docker-compose.yaml",
             "--file",
-            "docker-compose.override.test_updated.yaml",
+            "docker-compose.override.test.yaml",
             "up",
             "-d",
             "--force-recreate",
         ],
         capture_output=True,
         text=True,
+        env={**os.environ,
+             "NTFY_TOPIC": str(test_topic),
+             "VERY_SIMPLE_UPLOAD_SERVER_IMAGE": os.environ.get("VERY_SIMPLE_UPLOAD_SERVER_IMAGE", ""),
+             "VERY_SIMPLE_MESSAGING_APP_IMAGE": os.environ.get("VERY_SIMPLE_MESSAGING_APP_IMAGE", "")},
     )
 
     if result.returncode != 0:
@@ -56,9 +51,10 @@ def start_containers():
 
     print("Containers started")
 
+
 def stop_containers():
     print("Stopping containers...")
-    result = subprocess.run(["docker-compose", "--file", "docker-compose.test.yaml", "--file", "docker-compose.override.test_updated.yaml", "down"], capture_output=True, text=True)
+    result = subprocess.run(["docker-compose", "--file", "docker-compose.yaml", "--file", "docker-compose.override.test_updated.yaml", "down"], capture_output=True, text=True)
  
     if result.returncode != 0:
         raise RuntimeError(f"Failed to stop containers: {result.stderr}")
