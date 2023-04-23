@@ -23,6 +23,13 @@ pre_tests_passed = False
 
 def print_docker_compose_config():
     print("Printing docker-compose config...")
+
+    env = {**os.environ,
+           "TEST_NTFY_TOPIC": str(test_topic),
+           "NTFY_HOST": messaging_app_url,
+           "ENV_TEST": "### inside integration test docker compose info",
+           "DEBUG": "true"}
+    
     result = subprocess.run(
         [
             "docker-compose",
@@ -34,10 +41,7 @@ def print_docker_compose_config():
         ],
         capture_output=True,
         text=True,
-        env={**os.environ,
-             "TEST_NTFY_TOPIC": str(test_topic),
-             "NTFY_HOST": messaging_app_url,
-             "DEBUG": "true"},
+        env=env,
     )
     if result.returncode != 0:
         raise RuntimeError(f"Failed to get docker-compose config: {result.stderr}")
@@ -55,6 +59,14 @@ def start_containers():
     # Erstellen Sie das data_test-Verzeichnis, falls es nicht existiert
     os.makedirs(data_directory, exist_ok=True)
 
+    env = {**os.environ,
+           "TEST_NTFY_TOPIC": str(test_topic),
+           "NTFY_HOST": messaging_app_url,
+           "ENV_TEST": "### inside integration test",
+           "DEBUG": "true"}
+
+    print(f"TEST_NTFY_TOPIC: {env['TEST_NTFY_TOPIC']}")  # Debug-Ausgabe hinzufügen
+
     result = subprocess.run(
         [
             "docker-compose",
@@ -68,10 +80,7 @@ def start_containers():
         ],
         capture_output=True,
         text=True,
-        env={**os.environ,
-             "TEST_NTFY_TOPIC": str(test_topic),
-             "NTFY_HOST": messaging_app_url,
-             "DEBUG": "true"},
+        env=env,
     )
 
     if result.returncode != 0:

@@ -31,6 +31,7 @@ services:
       NTFY_TOPIC: ${NTFY_TOPIC}
       NTFY_HOST: ${NTFY_HOST}
       DEBUG: ${DEBUG}
+      ENV_TEST: "### inside docker-compose"
     volumes:
       - ./src:/src
       - /var/run/docker.sock:/var/run/docker.sock

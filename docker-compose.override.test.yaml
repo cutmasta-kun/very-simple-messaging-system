@@ -12,3 +12,5 @@ services:
   very-simple-messaging-app:
     environment:
       NTFY_TOPIC: ${TEST_NTFY_TOPIC}
+      ENV_TEST: "### inside override.test"
+    command: bash -c "export && exec python3 very_simple_start_skript.py"
