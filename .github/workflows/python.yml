@@ -35,8 +35,8 @@ jobs:
     - name: Build, Tag, and Push Docker Images if Necessary
       run: |
         # Image URLs
-        VERY_SIMPLE_UPLOAD_SERVER_IMAGE="ghcr.io/${{ github.repository }}/very_simple_upload_server:${{ steps.calculate_hashes.outputs.upload_server_hash }}"
-        VERY_SIMPLE_MESSAGING_APP_IMAGE="ghcr.io/${{ github.repository }}/very_simple_messaging_app:${{ steps.calculate_hashes.outputs.messaging_app_hash }}"
+        VERY_SIMPLE_UPLOAD_SERVER_IMAGE="ghcr.io/${{ github.repository }}/very_simple_upload_server:latest"
+        VERY_SIMPLE_MESSAGING_APP_IMAGE="ghcr.io/${{ github.repository }}/very_simple_messaging_app:latest"
 
         # Check if the images already exist in the registry
         UPLOAD_SERVER_IMAGE_EXISTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" "https://ghcr.io/v2/${{ github.repository }}/very_simple_upload_server/tags/list" | jq ".tags[] | select(. == \"${{ steps.calculate_hashes.outputs.upload_server_hash }}\")")
