@@ -11,6 +11,7 @@ import subprocess
 import sys
 import shutil
 import stat
+import re
 
 messaging_app_url = os.environ.get("NTFY_HOST", "https://ntfy.sh")
 upload_server_url = "http://test_very-simple-upload-server:9090"  # Passen Sie die URL an Ihre Umgebung an
@@ -23,14 +24,17 @@ pre_tests_passed = False
 def start_containers():
     print("Starting containers...")
 
-    # Set the NTFY_TOPIC, NTFY_HOST, and DEBUG environment variables for the docker-compose process
-    env = os.environ.copy()
-    env["NTFY_TOPIC"] = str(test_topic)
-    env["NTFY_HOST"] = 'test_host'  # Replace 'test_host' with the actual value
-    env["DEBUG"] = 'true'
-
     # Erstellen Sie das data_test-Verzeichnis, falls es nicht existiert
     os.makedirs(data_directory, exist_ok=True)
+
+    # Aktualisieren Sie die docker-compose.override.test.yaml Datei mit den Umgebungsvariablen
+    with open("docker-compose.override.test.yaml", "r") as file:
+        content = file.read()
+
+    content = re.sub(r'NTFY_TOPIC: \${NTFY_TOPIC:-}', f'NTFY_TOPIC: {test_topic}', content)
+
+    with open("docker-compose.override.test_updated.yaml", "w") as file:
+        file.write(content)
 
     result = subprocess.run(
         [
@@ -38,14 +42,13 @@ def start_containers():
             "--file",
             "docker-compose.yaml",
             "--file",
-            "docker-compose.override.test.yaml",
+            "docker-compose.override.test_updated.yaml",
             "up",
             "-d",
             "--force-recreate",  # This flag forces the recreation of containers
         ],
         capture_output=True,
         text=True,
-        env=env,  # Pass the modified environment to the subprocess
     )
 
     if result.returncode != 0:
@@ -55,12 +58,16 @@ def start_containers():
 
 def stop_containers():
     print("Stopping containers...")
-    result = subprocess.run(["docker-compose", "down"], capture_output=True, text=True)
+    result = subprocess.run(["docker-compose", "--file", "docker-compose.yaml", "--file", "docker-compose.override.test_updated.yaml", "down"], capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(f"Failed to stop containers: {result.stderr}")
     
     # Löschen des data_test-Verzeichnisses
     shutil.rmtree(data_directory, ignore_errors=True)
+
+    # Löschen der docker-compose.override.test_updated.yaml Datei
+    if os.path.exists("docker-compose.override.test_updated.yaml"):
+        os.remove("docker-compose.override.test_updated.yaml")
 
     print("Containers stopped")
 
