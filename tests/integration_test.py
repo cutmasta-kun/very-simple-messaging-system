@@ -54,7 +54,7 @@ def start_containers():
 
 def stop_containers():
     print("Stopping containers...")
-    result = subprocess.run(["docker-compose", "--file", "docker-compose.yaml", "--file", "docker-compose.override.test_updated.yaml", "down"], capture_output=True, text=True)
+    result = subprocess.run(["docker-compose", "--file", "docker-compose.yaml", "--file", "docker-compose.override.test.yaml", "down"], capture_output=True, text=True)
  
     if result.returncode != 0:
         raise RuntimeError(f"Failed to stop containers: {result.stderr}")

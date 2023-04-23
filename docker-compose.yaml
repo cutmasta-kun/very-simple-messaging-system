@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.upload-server
-    image: very_simple_upload_server
+    image: ${VERY_SIMPLE_UPLOAD_SERVER_IMAGE:-very_simple_upload_server}
     container_name: very-simple-upload-server
     environment:
       - very-simple-uuid-token=0dcac178-d084-4313-be7c-330a4c9f0867
@@ -25,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.app
-    image: very_simple_messaging_app
+    image: ${VERY_SIMPLE_MESSAGING_APP_IMAGE:-very_simple_messaging_app}
     container_name: very-simple-messaging-app
     environment:
       - NTFY_TOPIC=${NTFY_TOPIC}
@@ -37,7 +37,6 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f 'very_simple_start_skript.py' || exit 1"]
-      interval: 60s
+      interval: 10s
       timeout: 10s
       retries: 3
-      start_period: 40s
