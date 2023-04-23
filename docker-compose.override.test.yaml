@@ -16,9 +16,7 @@ services:
 
   very-simple-messaging-app:
     environment:
-      NTFY_TOPIC: ${NTFY_TOPIC}
-      NTFY_HOST: ${NTFY_HOST}
-      DEBUG: ${DEBUG}
+      NTFY_TOPIC: ${NTFY_TOPIC:-}
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f 'very_simple_start_skript.py' || exit 1"]
       interval: 10s
