@@ -1,6 +1,9 @@
 # Data Folder needs to be there, but no data inside should get commited
 data/*
 
+# Generated Test Files
+docker-compose.override.test_updated.yaml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
