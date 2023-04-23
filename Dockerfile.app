@@ -40,11 +40,12 @@ RUN apt-get update && \
 
 RUN pip install requests
 
+# Kopieren der Skripte
+
+COPY src/ /src
+
 # Setzen des Arbeitsverzeichnisses
 WORKDIR /src
-
-# Kopieren des Skripts in den Container
-COPY src/very_simple_start_skript.py /src/very_simple_start_skript.py
 
 HEALTHCHECK  --interval=5s --timeout=3s \
   CMD pgrep -f "very_simple_start_skript.py" || exit 1

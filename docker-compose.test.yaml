@@ -1,0 +1,34 @@
+# docker-compose.test.yaml
+
+version: '3.9'
+
+services:
+  very-simple-upload-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.upload-server
+    image: ghcr.io/cutmasta-kun/very-simple-messaging-system/very_simple_upload_server_test:latest
+    ports:
+      - "9090:80"
+    volumes:
+      - ./data_test:/uploads  # Verwenden Sie ein separates Verzeichnis für die CI-Umgebung
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f './app' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  very-simple-messaging-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    image: ghcr.io/cutmasta-kun/very-simple-messaging-system/very_simple_messaging_app_test:latest
+    environment:
+      NTFY_TOPIC: ${NTFY_TOPIC:-}
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'very_simple_start_skript.py' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+

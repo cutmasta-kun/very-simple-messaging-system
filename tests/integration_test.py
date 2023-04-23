@@ -40,12 +40,12 @@ def start_containers():
         [
             "docker-compose",
             "--file",
-            "docker-compose.yaml",
+            "docker-compose.yaml",  # Use the test file instead of docker-compose.yaml
             "--file",
             "docker-compose.override.test_updated.yaml",
             "up",
             "-d",
-            "--force-recreate",  # This flag forces the recreation of containers
+            "--force-recreate",
         ],
         capture_output=True,
         text=True,
@@ -58,7 +58,8 @@ def start_containers():
 
 def stop_containers():
     print("Stopping containers...")
-    result = subprocess.run(["docker-compose", "--file", "docker-compose.yaml", "--file", "docker-compose.override.test_updated.yaml", "down"], capture_output=True, text=True)
+    result = subprocess.run(["docker-compose", "--file", "docker-compose.test.yaml", "--file", "docker-compose.override.test_updated.yaml", "down"], capture_output=True, text=True)
+ 
     if result.returncode != 0:
         raise RuntimeError(f"Failed to stop containers: {result.stderr}")
     
