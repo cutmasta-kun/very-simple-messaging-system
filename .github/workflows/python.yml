@@ -30,11 +30,14 @@ jobs:
         docker-compose --file docker-compose.yaml --file docker-compose.override.test.yaml build
     - name: Tag Docker Images
       run: |
-        docker tag very_simple_messaging_system very_simple_messaging_system_test:latest
+        docker tag very_simple_upload_server very_simple_upload_server_test:latest
+        docker tag very_simple_messaging_app very_simple_messaging_app_test:latest
     - name: Push Docker Images to GitHub Container Registry
       run: |
-        docker tag very_simple_messaging_system_test ghcr.io/${{ github.repository }}/very_simple_messaging_system_test:latest
-        docker push ghcr.io/${{ github.repository }}/very_simple_messaging_system_test:latest
+        docker tag very_simple_upload_server_test ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest
+        docker push ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest
+        docker tag very_simple_messaging_app_test ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest
+        docker push ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest
 
   unittests:
     runs-on: ubuntu-latest
@@ -53,8 +56,10 @@ jobs:
       run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     - name: Pull Docker Images
       run: |
-        docker pull ghcr.io/${{ github.repository }}/very_simple_messaging_system_test:latest
-        docker tag ghcr.io/${{ github.repository }}/very_simple_messaging_system_test:latest very_simple_messaging_system_test
+        docker pull ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest
+        docker tag ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest very_simple_upload_server
+        docker pull ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest
+        docker tag ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest very_simple_messaging_app
     - name: Run unittests
       run: |
         pytest --junitxml=unittest-results.xml tests/test_instance.py tests/test_very_simple_start_skript.py
@@ -76,8 +81,10 @@ jobs:
       run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     - name: Pull Docker Images
       run: |
-        docker pull ghcr.io/${{ github.repository }}/very_simple_messaging_system_test:latest
-        docker tag ghcr.io/${{ github.repository }}/very_simple_messaging_system_test:latest very_simple_messaging_system_test
+        docker pull ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest
+        docker tag ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest very_simple_upload_server
+        docker pull ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest
+        docker tag ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest very_simple_messaging_app
     - name: Set environment variables
       run: |
         echo "DEBUG=true" >> $GITHUB_ENV
