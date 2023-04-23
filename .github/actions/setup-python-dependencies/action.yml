@@ -1,0 +1,21 @@
+# .github/actions/setup-python-dependencies/action.yml
+
+name: 'Set up Python and Install Dependencies'
+description: 'Set up Python and install dependencies from a requirements.txt file'
+inputs:
+  requirements:
+    description: 'Path to the requirements.txt file'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r ${{ inputs.requirements }}
+      shell: bash

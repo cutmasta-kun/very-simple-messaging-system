@@ -25,7 +25,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python and install dependencies
-      uses: python-actions/python-dependencies@v1
+      uses: ./.github/actions/setup-python-dependencies
       with:
         requirements: requirements.txt
     - name: Run unittests
@@ -38,12 +38,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python and install dependencies
-      uses: python-actions/python-dependencies@v1
+      uses: ./.github/actions/setup-python-dependencies
       with:
         requirements: requirements.txt
     - name: Set environment variables
       run: |
-        echo "DEBUG=true" >> $GITHUB_ENV
+        echo "DEBUG=false" >> $GITHUB_ENV
         echo "NTFY_TOPIC=" >> $GITHUB_ENV
     - name: Run integration tests
       env:
