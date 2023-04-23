@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.upload-server
-    image: very-simple-upload-server
+    image: very_simple_upload_server
     container_name: very-simple-upload-server
     environment:
       - very-simple-uuid-token=0dcac178-d084-4313-be7c-330a4c9f0867
@@ -25,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.app
-    image: very-simple-messaging-app
+    image: very_simple_messaging_app
     container_name: very-simple-messaging-app
     environment:
       - NTFY_TOPIC=${NTFY_TOPIC}
