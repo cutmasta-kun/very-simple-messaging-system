@@ -35,7 +35,7 @@ def print_docker_compose_config():
         capture_output=True,
         text=True,
         env={**os.environ,
-             "NTFY_TOPIC": str(test_topic),
+             "TEST_NTFY_TOPIC": str(test_topic),
              "NTFY_HOST": messaging_app_url,
              "DEBUG": "true"},
     )
@@ -69,7 +69,7 @@ def start_containers():
         capture_output=True,
         text=True,
         env={**os.environ,
-             "NTFY_TOPIC": str(test_topic),
+             "TEST_NTFY_TOPIC": str(test_topic),
              "NTFY_HOST": messaging_app_url,
              "DEBUG": "true"},
     )

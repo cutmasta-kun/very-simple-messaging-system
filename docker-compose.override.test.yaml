@@ -11,4 +11,4 @@ services:
 
   very-simple-messaging-app:
     environment:
-      NTFY_TOPIC: ${NTFY_TOPIC}
+      NTFY_TOPIC: ${TEST_NTFY_TOPIC}
