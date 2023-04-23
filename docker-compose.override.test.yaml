@@ -4,9 +4,11 @@ version: '3.9'
 
 services:
   very-simple-upload-server:
+    ports:
+      - "9090:80"
     volumes:
       - ./data_test:/uploads
 
   very-simple-messaging-app:
     environment:
-      NTFY_TOPIC: ${NTFY_TOPIC:-}
+      NTFY_TOPIC: ${NTFY_TOPIC}

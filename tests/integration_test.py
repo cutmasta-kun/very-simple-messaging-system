@@ -42,15 +42,14 @@ def start_containers():
         text=True,
         env={**os.environ,
              "NTFY_TOPIC": str(test_topic),
-             "VERY_SIMPLE_UPLOAD_SERVER_IMAGE": os.environ.get("VERY_SIMPLE_UPLOAD_SERVER_IMAGE", ""),
-             "VERY_SIMPLE_MESSAGING_APP_IMAGE": os.environ.get("VERY_SIMPLE_MESSAGING_APP_IMAGE", "")},
+             "NTFY_HOST": messaging_app_url,
+             "DEBUG": "true"},
     )
 
     if result.returncode != 0:
         raise RuntimeError(f"Failed to start containers: {result.stderr}")
 
     print("Containers started")
-
 
 def stop_containers():
     print("Stopping containers...")
@@ -91,7 +90,7 @@ def wait_for_containers_healthcheck(max_wait_time=300):
                     print(f"Waiting for {container_name} to become healthy (current status: {health_status})")
                     container_logs = container.logs(tail=2).decode("utf-8")
                     print(f"Logs for {container_name}:\n{container_logs}")
-        time.sleep(5)
+        time.sleep(10)
 
         elapsed_time = time.time() - start_time
         if elapsed_time > max_wait_time:
@@ -178,7 +177,7 @@ class IntegrationTest(unittest.TestCase):
             directory_created = False
             print(f"Waiting for directory {test_topic_directory} to be created...")
 
-            for _ in range(10):  # Erhöhen Sie die Anzahl der Wiederholungen, um auf das Verzeichnis zu warten
+            for _ in range(20):  # Erhöhen Sie die Anzahl der Wiederholungen, um auf das Verzeichnis zu warten
                 if os.path.exists(test_topic_directory):
                     directory_created = True
                     break
@@ -191,7 +190,7 @@ class IntegrationTest(unittest.TestCase):
             message_id = None
             print(f"Checking for files in {test_topic_directory}...")
 
-            for _ in range(20):  # Erhöhen Sie die Anzahl der Wiederholungen, um auf die Datei zu warten
+            for _ in range(10):  # Erhöhen Sie die Anzahl der Wiederholungen, um auf die Datei zu warten
                 for file in os.listdir(test_topic_directory):
                     print(f"Found file: {file}")
                     if file.endswith(".json"):

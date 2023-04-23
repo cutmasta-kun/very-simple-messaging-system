@@ -16,68 +16,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Docker
-      run: |
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sudo sh get-docker.sh
-        sudo systemctl start docker
-        sudo systemctl enable docker
-        sudo docker --version
-    - name: Log in to GitHub Container Registry
-      run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-    - name: Calculate Hashes
-      id: calculate_hashes
-      run: |
-        UPLOAD_SERVER_HASH=$(find . -path "./Dockerfile.upload-server" -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
-        MESSAGING_APP_HASH=$(find . -path "./Dockerfile.app" -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
-        echo "::set-output name=upload_server_hash::$UPLOAD_SERVER_HASH"
-        echo "::set-output name=messaging_app_hash::$MESSAGING_APP_HASH"
-    - name: Build, Tag, and Push Docker Images if Necessary
-      run: |
-        # Image URLs
-        VERY_SIMPLE_UPLOAD_SERVER_IMAGE="ghcr.io/${{ github.repository }}/very_simple_upload_server:latest"
-        VERY_SIMPLE_MESSAGING_APP_IMAGE="ghcr.io/${{ github.repository }}/very_simple_messaging_app:latest"
-
-        # Check if the images already exist in the registry
-        UPLOAD_SERVER_IMAGE_EXISTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" "https://ghcr.io/v2/${{ github.repository }}/very_simple_upload_server/tags/list" | jq ".tags[] | select(. == \"${{ steps.calculate_hashes.outputs.upload_server_hash }}\")")
-        MESSAGING_APP_IMAGE_EXISTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" "https://ghcr.io/v2/${{ github.repository }}/very_simple_messaging_app/tags/list" | jq ".tags[] | select(. == \"${{ steps.calculate_hashes.outputs.messaging_app_hash }}\")")
-
-        if [ -z "$UPLOAD_SERVER_IMAGE_EXISTS" ] || [ -z "$MESSAGING_APP_IMAGE_EXISTS" ]; then
-          # Build the images if they don't already exist
-          docker-compose build
-
-          # Tag and push the images
-          docker tag very_simple_upload_server $VERY_SIMPLE_UPLOAD_SERVER_IMAGE
-          docker push $VERY_SIMPLE_UPLOAD_SERVER_IMAGE
-          docker tag very_simple_messaging_app $VERY_SIMPLE_MESSAGING_APP_IMAGE
-          docker push $VERY_SIMPLE_MESSAGING_APP_IMAGE
-
-          # Push the 'latest' tag
-          docker tag very_simple_upload_server ghcr.io/${{ github.repository }}/very_simple_upload_server:latest
-          docker push ghcr.io/${{ github.repository }}/very_simple_upload_server:latest
-          docker tag very_simple_messaging_app ghcr.io/${{ github.repository }}/very_simple_messaging_app:latest
-          docker push ghcr.io/${{ github.repository }}/very_simple_messaging_app:latest
-        fi
-
-        # Output the image URLs
-        echo "VERY_SIMPLE_UPLOAD_SERVER_IMAGE=$VERY_SIMPLE_UPLOAD_SERVER_IMAGE"
-        echo "VERY_SIMPLE_MESSAGING_APP_IMAGE=$VERY_SIMPLE_MESSAGING_APP_IMAGE"
-        echo "::set-output name=very_simple_upload_server_image::$VERY_SIMPLE_UPLOAD_SERVER_IMAGE"
-        echo "::set-output name=very_simple_messaging_app_image::$VERY_SIMPLE_MESSAGING_APP_IMAGE"
+    - name: Build Docker Images
+      run: docker-compose build
 
   unittests:
     runs-on: ubuntu-latest
     needs: build_images
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.x
-      uses: actions/setup-python@v2
+    - name: Set up Python and install dependencies
+      uses: python-actions/python-dependencies@v1
       with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        requirements: requirements.txt
     - name: Run unittests
       run: |
         pytest --junitxml=unittest-results.xml tests/test_instance.py tests/test_very_simple_start_skript.py
@@ -87,20 +37,14 @@ jobs:
     needs: build_images
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.x
-      uses: actions/setup-python@v2
+    - name: Set up Python and install dependencies
+      uses: python-actions/python-dependencies@v1
       with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        requirements: requirements.txt
     - name: Set environment variables
       run: |
         echo "DEBUG=true" >> $GITHUB_ENV
-        echo "NTFY_TOPIC=" >> $GITHUB_ENV  # Set a value here, or use an env variable from the repository or GitHub Secrets
-        echo "VERY_SIMPLE_UPLOAD_SERVER_IMAGE=${{ needs.build_images.outputs.very_simple_upload_server_image }}" >> $GITHUB_ENV
-        echo "VERY_SIMPLE_MESSAGING_APP_IMAGE=${{ needs.build_images.outputs.very_simple_messaging_app_image }}" >> $GITHUB_ENV
+        echo "NTFY_TOPIC=" >> $GITHUB_ENV
     - name: Run integration tests
       env:
         CI: true
