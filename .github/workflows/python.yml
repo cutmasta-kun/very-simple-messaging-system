@@ -25,20 +25,38 @@ jobs:
         sudo docker --version
     - name: Log in to GitHub Container Registry
       run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-    - name: Build Docker Images
+    - name: Build, Tag, and Push Docker Images if Necessary
       run: |
-        docker-compose build
-    - name: Tag and Push Docker Images
-      run: |
-        docker tag very_simple_upload_server ghcr.io/${{ github.repository }}/very_simple_upload_server:latest
-        docker push ghcr.io/${{ github.repository }}/very_simple_upload_server:latest
-        docker tag very_simple_messaging_app ghcr.io/${{ github.repository }}/very_simple_messaging_app:latest
-        docker push ghcr.io/${{ github.repository }}/very_simple_messaging_app:latest
-    - name: Get image URLs
-      id: extract-image-url
-      run: |
-        VERY_SIMPLE_UPLOAD_SERVER_IMAGE=$(docker inspect --format='{{index .RepoDigests 0}}' very_simple_upload_server)
-        VERY_SIMPLE_MESSAGING_APP_IMAGE=$(docker inspect --format='{{index .RepoDigests 0}}' very_simple_messaging_app)
+        # Calculate a hash for each Dockerfile and its dependencies
+        UPLOAD_SERVER_HASH=$(find very_simple_upload_server -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
+        MESSAGING_APP_HASH=$(find very_simple_messaging_app -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
+        
+        # Image URLs
+        VERY_SIMPLE_UPLOAD_SERVER_IMAGE="ghcr.io/${{ github.repository }}/very_simple_upload_server:$UPLOAD_SERVER_HASH"
+        VERY_SIMPLE_MESSAGING_APP_IMAGE="ghcr.io/${{ github.repository }}/very_simple_messaging_app:$MESSAGING_APP_HASH"
+
+        # Check if the images already exist in the registry
+        UPLOAD_SERVER_IMAGE_EXISTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" "https://ghcr.io/v2/${{ github.repository }}/very_simple_upload_server/tags/list" | jq ".tags[] | select(. == \"$UPLOAD_SERVER_HASH\")")
+        MESSAGING_APP_IMAGE_EXISTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" "https://ghcr.io/v2/${{ github.repository }}/very_simple_messaging_app/tags/list" | jq ".tags[] | select(. == \"$MESSAGING_APP_HASH\")")
+
+        if [ -z "$UPLOAD_SERVER_IMAGE_EXISTS" ] || [ -z "$MESSAGING_APP_IMAGE_EXISTS" ]; then
+          # Build the images if they don't already exist
+          docker-compose build
+
+          # Tag and push the images
+          docker tag very_simple_upload_server $VERY_SIMPLE_UPLOAD_SERVER_IMAGE
+          docker push $VERY_SIMPLE_UPLOAD_SERVER_IMAGE
+          docker tag very_simple_messaging_app $VERY_SIMPLE_MESSAGING_APP_IMAGE
+          docker push $VERY_SIMPLE_MESSAGING_APP_IMAGE
+
+          # Push the 'latest' tag
+          docker tag very_simple_upload_server ghcr.io/${{ github.repository }}/very_simple_upload_server:latest
+          docker push ghcr.io/${{ github.repository }}/very_simple_upload_server:latest
+          docker tag very_simple_messaging_app ghcr.io/${{ github.repository }}/very_simple_messaging_app:latest
+          docker push ghcr.io/${{ github.repository }}/very_simple_messaging_app:latest
+        fi
+
+        # Output the image URLs
         echo "VERY_SIMPLE_UPLOAD_SERVER_IMAGE=$VERY_SIMPLE_UPLOAD_SERVER_IMAGE"
         echo "VERY_SIMPLE_MESSAGING_APP_IMAGE=$VERY_SIMPLE_MESSAGING_APP_IMAGE"
         echo "::set-output name=very_simple_upload_server_image::$VERY_SIMPLE_UPLOAD_SERVER_IMAGE"
