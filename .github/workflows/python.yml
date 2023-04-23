@@ -30,8 +30,8 @@ jobs:
         docker-compose --file docker-compose.yaml --file docker-compose.test.yaml build
     - name: Tag Test Docker Images
       run: |
-        docker tag very_simple_upload_server very_simple_upload_server_test:latest
-        docker tag very_simple_messaging_app very_simple_messaging_app_test:latest
+        docker tag ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest very_simple_upload_server_test:latest
+        docker tag ghcr.io/${{ github.repository }}/very_simple_messaging_app_test:latest very_simple_messaging_app_test:latest
     - name: Push Test Docker Images to GitHub Container Registry
       run: |
         docker tag very_simple_upload_server_test ghcr.io/${{ github.repository }}/very_simple_upload_server_test:latest
