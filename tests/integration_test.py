@@ -21,8 +21,36 @@ test_topic = os.environ.get("NTFY_TOPIC", uuid.uuid4())
 test_message = f"test_message_with_uuid:{test_uuid}"
 pre_tests_passed = False
 
+def print_docker_compose_config():
+    print("Printing docker-compose config...")
+    result = subprocess.run(
+        [
+            "docker-compose",
+            "--file",
+            "docker-compose.yaml",
+            "--file",
+            "docker-compose.override.test.yaml",
+            "config"
+        ],
+        capture_output=True,
+        text=True,
+        env={**os.environ,
+             "NTFY_TOPIC": str(test_topic),
+             "NTFY_HOST": messaging_app_url,
+             "DEBUG": "true"},
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Failed to get docker-compose config: {result.stderr}")
+    print(result.stdout)
+
 def start_containers():
+    print_docker_compose_config()
     print("Starting containers...")
+
+    # Print environment variables
+    print(f"NTFY_TOPIC: {test_topic}")
+    print(f"NTFY_HOST: {messaging_app_url}")
+    print(f"DEBUG: {'true'}")
 
     # Erstellen Sie das data_test-Verzeichnis, falls es nicht existiert
     os.makedirs(data_directory, exist_ok=True)

@@ -28,9 +28,10 @@ jobs:
       uses: ./.github/actions/setup-python-dependencies
       with:
         requirements: requirements.txt
-    - name: Run unittests
-      run: |
-        pytest --junitxml=unittest-results.xml tests/test_instance.py tests/test_very_simple_start_skript.py
+    - name: Run unittests - test_instance
+      run: pytest --junitxml=unittest-results.xml tests/test_instance.py
+    - name: Run unittests - test_very_simple_start_skript
+      run: pytest --junitxml=unittest-results.xml tests/test_very_simple_start_skript.py
 
   integration_tests:
     runs-on: ubuntu-latest
