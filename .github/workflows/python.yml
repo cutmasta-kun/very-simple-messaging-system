@@ -25,19 +25,22 @@ jobs:
         sudo docker --version
     - name: Log in to GitHub Container Registry
       run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+    - name: Calculate Hashes
+      id: calculate_hashes
+      run: |
+        UPLOAD_SERVER_HASH=$(find . -path "./Dockerfile.upload-server" -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
+        MESSAGING_APP_HASH=$(find . -path "./Dockerfile.app" -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
+        echo "::set-output name=upload_server_hash::$UPLOAD_SERVER_HASH"
+        echo "::set-output name=messaging_app_hash::$MESSAGING_APP_HASH"
     - name: Build, Tag, and Push Docker Images if Necessary
       run: |
-        # Calculate a hash for each Dockerfile and its dependencies
-        UPLOAD_SERVER_HASH=$(find very_simple_upload_server -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
-        MESSAGING_APP_HASH=$(find very_simple_messaging_app -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
-        
         # Image URLs
-        VERY_SIMPLE_UPLOAD_SERVER_IMAGE="ghcr.io/${{ github.repository }}/very_simple_upload_server:$UPLOAD_SERVER_HASH"
-        VERY_SIMPLE_MESSAGING_APP_IMAGE="ghcr.io/${{ github.repository }}/very_simple_messaging_app:$MESSAGING_APP_HASH"
+        VERY_SIMPLE_UPLOAD_SERVER_IMAGE="ghcr.io/${{ github.repository }}/very_simple_upload_server:${{ steps.calculate_hashes.outputs.upload_server_hash }}"
+        VERY_SIMPLE_MESSAGING_APP_IMAGE="ghcr.io/${{ github.repository }}/very_simple_messaging_app:${{ steps.calculate_hashes.outputs.messaging_app_hash }}"
 
         # Check if the images already exist in the registry
-        UPLOAD_SERVER_IMAGE_EXISTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" "https://ghcr.io/v2/${{ github.repository }}/very_simple_upload_server/tags/list" | jq ".tags[] | select(. == \"$UPLOAD_SERVER_HASH\")")
-        MESSAGING_APP_IMAGE_EXISTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" "https://ghcr.io/v2/${{ github.repository }}/very_simple_messaging_app/tags/list" | jq ".tags[] | select(. == \"$MESSAGING_APP_HASH\")")
+        UPLOAD_SERVER_IMAGE_EXISTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" "https://ghcr.io/v2/${{ github.repository }}/very_simple_upload_server/tags/list" | jq ".tags[] | select(. == \"${{ steps.calculate_hashes.outputs.upload_server_hash }}\")")
+        MESSAGING_APP_IMAGE_EXISTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" "https://ghcr.io/v2/${{ github.repository }}/very_simple_messaging_app/tags/list" | jq ".tags[] | select(. == \"${{ steps.calculate_hashes.outputs.messaging_app_hash }}\")")
 
         if [ -z "$UPLOAD_SERVER_IMAGE_EXISTS" ] || [ -z "$MESSAGING_APP_IMAGE_EXISTS" ]; then
           # Build the images if they don't already exist
