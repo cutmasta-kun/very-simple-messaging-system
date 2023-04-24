@@ -4,6 +4,8 @@ FROM alpine:3.17.3
 
 COPY --from=hallotschuess/very-simple-upload-server:latest /server/app ./
 
+RUN mkdir -p /uploads && chmod 777 /uploads
+
 RUN apk --no-cache add wget
 
 HEALTHCHECK  --interval=5m --timeout=3s \

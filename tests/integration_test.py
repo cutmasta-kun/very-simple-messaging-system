@@ -25,7 +25,7 @@ def start_containers():
     print("Starting containers...")
 
     os.makedirs(data_directory, exist_ok=True)
-    os.chmod(data_directory, 0o777)  # Setzen Sie die Berechtigungen für das Verzeichnis auf 777
+    subprocess.run(["chmod", "777", data_directory]) 
 
     env = {**os.environ,
            "TEST_NTFY_TOPIC": str(test_topic),
