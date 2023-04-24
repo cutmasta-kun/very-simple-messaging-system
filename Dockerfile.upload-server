@@ -12,10 +12,10 @@ RUN mkdir -p /uploads && chmod 777 /uploads
 
 RUN apk --no-cache add wget
 
-RUN adduser --disabled-password --gecos '' very-simple-uploader
-USER very-simple-uploader
-
 HEALTHCHECK  --interval=5m --timeout=3s \
   CMD pgrep -f "app" || exit 1
+
+RUN adduser --disabled-password --gecos '' runner
+USER runner
 
 ENTRYPOINT ["/entrypoint.sh", "./app"]

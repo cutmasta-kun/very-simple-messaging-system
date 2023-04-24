@@ -71,7 +71,7 @@ def stop_containers():
 
     print("Containers stopped")
 
-def wait_for_containers_healthcheck(max_wait_time=300):
+def wait_for_containers_healthcheck(max_wait_time=180):
     client = docker.from_env()
     container_names = [
         "very-simple-upload-server",
@@ -92,7 +92,7 @@ def wait_for_containers_healthcheck(max_wait_time=300):
                     print(f"{container_name} is healthy")
                 else:
                     print(f"Waiting for {container_name} to become healthy (current status: {health_status})")
-        time.sleep(10)
+        time.sleep(2)
 
         elapsed_time = time.time() - start_time
         if elapsed_time > max_wait_time:
@@ -190,7 +190,7 @@ class IntegrationTest(unittest.TestCase):
             directory_created = False
             print(f"Waiting for directory {test_topic_directory} to be created...")
 
-            for _ in range(20):  # Erhöhen Sie die Anzahl der Wiederholungen, um auf das Verzeichnis zu warten
+            for _ in range(10):  # Erhöhen Sie die Anzahl der Wiederholungen, um auf das Verzeichnis zu warten
                 if os.path.exists(test_topic_directory):
                     directory_created = True
                     break
@@ -205,7 +205,7 @@ class IntegrationTest(unittest.TestCase):
             message_id = None
             print(f"Checking for files in {test_topic_directory}...")
 
-            for _ in range(10):  # Erhöhen Sie die Anzahl der Wiederholungen, um auf die Datei zu warten
+            for _ in range(5):  # Erhöhen Sie die Anzahl der Wiederholungen, um auf die Datei zu warten
                 for file in os.listdir(test_topic_directory):
                     print(f"Found file: {file}")
                     if file.endswith(".json"):
