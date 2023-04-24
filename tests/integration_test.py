@@ -109,6 +109,14 @@ def wait_for_containers_healthcheck(max_wait_time=300):
         if elapsed_time > max_wait_time:
             raise TimeoutError(f"Max wait time of {max_wait_time}s exceeded while waiting for containers to become healthy")
 
+    print("Checking very-simple-messaging-app logs:")
+    result = subprocess.run(
+        ["docker", "logs", "very-simple-messaging-app"],
+        capture_output=True,
+        text=True,
+    )
+    print(result.stdout)
+
     print("All containers are healthy")
 
 def wait_for_app_initialization(container_name, max_wait_time=30):
