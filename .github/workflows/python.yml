@@ -42,10 +42,6 @@ jobs:
       uses: ./.github/actions/setup-python-dependencies
       with:
         requirements: requirements.txt
-    - name: Set environment variables
-      run: |
-        echo "DEBUG=false" >> $GITHUB_ENV
-        echo "NTFY_TOPIC=" >> $GITHUB_ENV
     - name: Run integration tests
       env:
         CI: true
