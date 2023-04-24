@@ -1,21 +1,23 @@
 # .github/actions/setup-python-dependencies/action.yml
 
-name: 'Set up Python and Install Dependencies'
-description: 'Set up Python and install dependencies from a requirements.txt file'
+name: Set up Python dependencies
+description: Install Python dependencies using pip
 inputs:
-  requirements:
-    description: 'Path to the requirements.txt file'
-    required: true
-
+  requirements-file:
+    description: 'Path to the requirements file'
+    required: false
+    default: 'requirements.txt'
 runs:
-  using: "composite"
+  using: composite
   steps:
-    - name: Set up Python 3.x
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
+    - run: |
         python -m pip install --upgrade pip
-        pip install -r ${{ inputs.requirements }}
+        if [ -f ${{ inputs.requirements-file }} ]; then pip install -r ${{ inputs.requirements-file }}; fi
       shell: bash
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-

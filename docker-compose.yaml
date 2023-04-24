@@ -14,7 +14,6 @@ services:
     volumes:
       - ./data:/uploads
     restart: unless-stopped
-    user: "1000:1000"
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f 'app' || exit 1"]
       interval: 5s
@@ -31,10 +30,8 @@ services:
       NTFY_TOPIC: '${NTFY_TOPIC}'
       NTFY_HOST: '${NTFY_HOST}'
       DEBUG: '${DEBUG}'
-      ENV_TEST: '### inside docker-compose'
     volumes:
       - ./src:/src
-      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f 'very_simple_start_skript.py' || exit 1"]

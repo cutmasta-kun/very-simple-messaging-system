@@ -25,12 +25,10 @@ def start_containers():
     print("Starting containers...")
 
     os.makedirs(data_directory, exist_ok=True)
-    subprocess.run(["chmod", "777", data_directory]) 
 
     env = {**os.environ,
            "TEST_NTFY_TOPIC": str(test_topic),
            "NTFY_HOST": messaging_app_url,
-           "ENV_TEST": "### inside integration test",
            "DEBUG": "true"}
     
     # Setzen Sie die Umgebungsvariablen auf dem ausführenden System
@@ -201,9 +199,6 @@ class IntegrationTest(unittest.TestCase):
                 time.sleep(2)  # Wartezeit in Sekunden
 
             self.assertTrue(directory_created, "Das Verzeichnis wurde nicht erstellt")
-
-            # Setzen Sie die Berechtigungen für das Verzeichnis auf 777
-            subprocess.run(["chmod", "-R", "777", test_topic_directory])
 
             # Warten Sie, bis die very-simple-messaging-app die Datei erstellt hat
             file_found = False
