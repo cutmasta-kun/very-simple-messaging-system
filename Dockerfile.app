@@ -21,6 +21,8 @@ RUN apt-get install -y wget
 
 COPY --from=NTFY /NTFY/ntfy_*.deb ./
 
+ENV ENV_TEST="### inside dockerfile"
+
 RUN dpkg -i ntfy_*.deb && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* ntfy_*.deb

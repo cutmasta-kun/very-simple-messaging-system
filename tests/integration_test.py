@@ -64,6 +64,9 @@ def start_containers():
            "NTFY_HOST": messaging_app_url,
            "ENV_TEST": "### inside integration test",
            "DEBUG": "true"}
+    
+    # Setzen Sie die Umgebungsvariablen auf dem ausführenden System
+    os.environ.update(env)
 
     print(f"TEST_NTFY_TOPIC: {env['TEST_NTFY_TOPIC']}")  # Debug-Ausgabe hinzufügen
 
