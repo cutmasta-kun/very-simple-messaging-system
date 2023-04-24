@@ -47,6 +47,10 @@ jobs:
       uses: ./.github/actions/setup-python-dependencies
       with:
         requirements: requirements.txt
+    - name: Set HOST_UID and HOST_GID environment variables
+      run: |
+        echo "HOST_UID=$(id -u)" >> $GITHUB_ENV
+        echo "HOST_GID=$(id -g)" >> $GITHUB_ENV
     - name: Run integration tests
       env:
         CI: true
@@ -57,3 +61,4 @@ jobs:
       with:
         name: integration-test-results
         path: integration-test-results.xml
+

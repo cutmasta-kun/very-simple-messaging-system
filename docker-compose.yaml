@@ -11,6 +11,8 @@ services:
     container_name: very-simple-upload-server
     environment:
       - very-simple-uuid-token=0dcac178-d084-4313-be7c-330a4c9f0867
+      - HOST_UID=${HOST_UID}
+      - HOST_GID=${HOST_GID}
     volumes:
       - ./data:/uploads
     restart: unless-stopped

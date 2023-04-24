@@ -3,19 +3,14 @@
 FROM alpine:3.17.3
 
 COPY --from=hallotschuess/very-simple-upload-server:latest /server/app ./
-COPY entrypoint.sh /entrypoint.sh
+COPY entrypoint-upload-server.sh /entrypoint.sh
 
 RUN chmod +x entrypoint.sh
 RUN chmod +x app
 
-RUN mkdir -p /uploads && chmod 777 /uploads
-
-RUN apk --no-cache add wget
+RUN apk --no-cache add wget su-exec
 
 HEALTHCHECK  --interval=5m --timeout=3s \
   CMD pgrep -f "app" || exit 1
-
-RUN adduser --disabled-password --gecos '' runner
-USER runner
 
 ENTRYPOINT ["/entrypoint.sh", "./app"]
