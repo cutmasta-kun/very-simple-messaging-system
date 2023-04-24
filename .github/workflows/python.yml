@@ -32,6 +32,11 @@ jobs:
       run: pytest -s --junitxml=unittest-results.xml tests/test_instance.py
     - name: Run unittests - test_very_simple_start_skript
       run: pytest -s --junitxml=unittest-results.xml tests/test_very_simple_start_skript.py
+    - name: Archive unittest-results.xml
+      uses: actions/upload-artifact@v2
+      with:
+        name: unittest-results
+        path: unittest-results.xml
 
   integration_tests:
     runs-on: ubuntu-latest
@@ -47,3 +52,8 @@ jobs:
         CI: true
       run: |
         pytest -s --junitxml=integration-test-results.xml tests/integration_test.py
+    - name: Archive integration-test-results.xml
+      uses: actions/upload-artifact@v2
+      with:
+        name: integration-test-results
+        path: integration-test-results.xml

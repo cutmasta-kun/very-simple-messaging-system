@@ -24,11 +24,6 @@ pre_tests_passed = False
 def start_containers():
     print("Starting containers...")
 
-    # Print environment variables
-    print(f"NTFY_TOPIC: {test_topic}")
-    print(f"NTFY_HOST: {messaging_app_url}")
-    print(f"DEBUG: {'true'}")
-
     # Erstellen Sie das data_test-Verzeichnis, falls es nicht existiert
     os.makedirs(data_directory, exist_ok=True)
 
@@ -40,8 +35,6 @@ def start_containers():
     
     # Setzen Sie die Umgebungsvariablen auf dem ausführenden System
     os.environ.update(env)
-
-    print(f"TEST_NTFY_TOPIC: {env['TEST_NTFY_TOPIC']}")  # Debug-Ausgabe hinzufügen
 
     result = subprocess.run(
         [
@@ -101,21 +94,11 @@ def wait_for_containers_healthcheck(max_wait_time=300):
                     print(f"{container_name} is healthy")
                 else:
                     print(f"Waiting for {container_name} to become healthy (current status: {health_status})")
-                    container_logs = container.logs(tail=2).decode("utf-8")
-                    print(f"Logs for {container_name}:\n{container_logs}")
         time.sleep(10)
 
         elapsed_time = time.time() - start_time
         if elapsed_time > max_wait_time:
             raise TimeoutError(f"Max wait time of {max_wait_time}s exceeded while waiting for containers to become healthy")
-
-    print("Checking very-simple-messaging-app logs:")
-    result = subprocess.run(
-        ["docker", "logs", "very-simple-messaging-app"],
-        capture_output=True,
-        text=True,
-    )
-    print(result.stdout)
 
     print("All containers are healthy")
 
@@ -171,6 +154,17 @@ class PreIntegrationTest(unittest.TestCase):
             except ImportError:
                 self.fail(f"Dependency '{dependency}' is not installed")
 
+def show_container_logs(tail_lines=2):
+    client = docker.from_env()
+    container_names = [
+        "very-simple-upload-server",
+        "very-simple-messaging-app",
+    ]
+    for container_name in container_names:
+        container = client.containers.get(container_name)
+        container_logs = container.logs(tail=tail_lines).decode("utf-8")
+        print(f"Logs for {container_name}:\n{container_logs}")
+
 class IntegrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -202,6 +196,8 @@ class IntegrationTest(unittest.TestCase):
                 if os.path.exists(test_topic_directory):
                     directory_created = True
                     break
+
+                show_container_logs()
                 time.sleep(2)  # Wartezeit in Sekunden
 
             self.assertTrue(directory_created, "Das Verzeichnis wurde nicht erstellt")
