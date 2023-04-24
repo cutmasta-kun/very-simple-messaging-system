@@ -202,6 +202,9 @@ class IntegrationTest(unittest.TestCase):
 
             self.assertTrue(directory_created, "Das Verzeichnis wurde nicht erstellt")
 
+            # Setzen Sie die Berechtigungen für das Verzeichnis auf 777
+            subprocess.run(["chmod", "-R", "777", test_topic_directory])
+
             # Warten Sie, bis die very-simple-messaging-app die Datei erstellt hat
             file_found = False
             message_id = None
