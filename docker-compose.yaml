@@ -28,10 +28,10 @@ services:
     image: very_simple_messaging_app
     container_name: very-simple-messaging-app
     environment:
-      NTFY_TOPIC: ${NTFY_TOPIC}
-      NTFY_HOST: ${NTFY_HOST}
-      DEBUG: ${DEBUG}
-      ENV_TEST: "### inside docker-compose"
+      NTFY_TOPIC: '${NTFY_TOPIC}'
+      NTFY_HOST: '${NTFY_HOST}'
+      DEBUG: '${DEBUG}'
+      ENV_TEST: '### inside docker-compose'
     volumes:
       - ./src:/src
       - /var/run/docker.sock:/var/run/docker.sock
