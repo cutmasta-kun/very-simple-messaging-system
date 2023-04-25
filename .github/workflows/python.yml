@@ -55,6 +55,8 @@ jobs:
       env:
         CI: true
       run: |
+        export HOST_UID=$(id -u)
+        export HOST_GID=$(id -g)
         pytest -s --junitxml=integration-test-results.xml tests/integration_test.py
     - name: Archive integration-test-results.xml
       uses: actions/upload-artifact@v2
