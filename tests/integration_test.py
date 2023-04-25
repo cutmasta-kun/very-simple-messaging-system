@@ -36,7 +36,8 @@ def start_containers():
 
     result = subprocess.run(
         [
-            "docker-compose",
+            "docker", 
+            "compose",
             "--file",
             "docker-compose.yaml",
             "--file",
